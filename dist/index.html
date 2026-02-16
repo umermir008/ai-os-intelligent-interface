@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI OS | Intelligent Command Center</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=Fira+Code&display=swap"
+        rel="stylesheet">
+    <!-- UI Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind Configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        os: {
+                            bg: '#0A0A0F',
+                            panel: '#111827',
+                            cyan: '#00F5FF',
+                            purple: '#7C3AED',
+                            lime: '#A3FF12',
+                            red: '#EF4444'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Space Grotesk', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        glow: {
+                            'from': { boxShadow: '0 0 5px rgba(0, 245, 255, 0.2), 0 0 10px rgba(0, 245, 255, 0.1)' },
+                            'to': { boxShadow: '0 0 20px rgba(0, 245, 255, 0.5), 0 0 30px rgba(0, 245, 255, 0.3)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+  <script type="module" crossorigin src="/assets/main-B5gGosQX.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-C2xCVFa8.css">
+</head>
+
+<body class="font-sans antialiased">
+    <!-- Boot Screen -->
+    <div id="boot-screen">
+        <div class="flex items-center gap-3 mb-4">
+            <i data-lucide="cpu" class="w-10 h-10 animate-pulse"></i>
+            <h1 class="font-heading font-bold text-3xl">AI<span class="text-os-cyan">OS</span></h1>
+        </div>
+        <div id="boot-text" class="text-xs uppercase tracking-widest font-mono opacity-60">Initializing Neural Core...
+        </div>
+        <div class="boot-loader">
+            <div class="boot-bar"></div>
+        </div>
+    </div>
+
+    <!-- Notifications Toast Area -->
+    <div id="toast-container" class="fixed top-20 right-6 z-[110] space-y-3 pointer-events-none"></div>
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 animated-grid pointer-events-none z-0"></div>
+    <div class="fixed inset-0 bg-gradient-to-b from-transparent via-os-bg/50 to-os-bg pointer-events-none z-0"></div>
+
+    <!-- Layout Container -->
+    <div class="relative z-10 flex flex-col h-screen overflow-hidden">
+
+        <!-- 1. TOP BAR -->
+        <header class="h-16 glass flex items-center justify-between px-6 border-b border-white/5 sticky top-0 z-50">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-white/10 rounded-lg">
+                    <i data-lucide="menu" class="w-6 h-6 text-os-cyan"></i>
+                </button>
+                <div
+                    class="p-2 bg-os-cyan/10 rounded-lg neo-border cursor-pointer hover:rotate-12 transition-transform">
+                    <i data-lucide="cpu" class="w-6 h-6 text-os-cyan"></i>
+                </div>
+                <h1 class="font-heading font-bold text-xl tracking-tight hidden sm:block">AI<span
+                        class="text-os-cyan">OS</span></h1>
+            </div>
+
+            <div class="flex-1 max-w-xl mx-8 hidden md:block">
+                <div class="relative group">
+                    <i data-lucide="search"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-os-cyan transition-colors"></i>
+                    <input type="text" placeholder="Global Command Search (Ctrl+K)..."
+                        class="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-os-cyan focus:ring-1 focus:ring-os-cyan/30 transition-all text-sm">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-5">
+                <button onclick="showToast('Voice activation ready.')"
+                    class="p-2 hover:bg-white/10 rounded-full transition-colors relative active:scale-90">
+                    <i data-lucide="mic" class="w-5 h-5 text-slate-400"></i>
+                </button>
+                <button onclick="showToast('3 New neural notifications')"
+                    class="p-2 hover:bg-white/10 rounded-full transition-colors relative active:scale-90">
+                    <i data-lucide="bell" class="w-5 h-5 text-slate-400"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-os-purple rounded-full animate-pulse"></span>
+                </button>
+                <button onclick="toggleSettings()"
+                    class="p-2 hover:bg-white/10 rounded-full transition-colors active:rotate-45">
+                    <i data-lucide="settings" class="w-5 h-5 text-slate-400"></i>
+                </button>
+                <button onclick="activateAgent()"
+                    class="hidden sm:flex items-center gap-2 bg-os-cyan text-os-bg px-4 py-1.5 rounded-full font-bold text-sm hover:shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-all transform active:scale-95">
+                    ACTIVATE AGENT
+                </button>
+                <div
+                    class="w-8 h-8 rounded-full border border-os-cyan p-0.5 cursor-pointer hover:ring-2 ring-os-cyan/20">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User"
+                        class="w-full h-full rounded-full bg-os-panel">
+                </div>
+            </div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden">
+            <!-- 2. SIDEBAR -->
+            <aside id="sidebar"
+                class="fixed lg:static w-64 glass border-r border-white/5 flex flex-col transition-all duration-300 z-40 -left-full lg:translate-x-0">
+                <nav class="flex-1 py-6 flex flex-col gap-1">
+                    <a href="javascript:void(0)" onclick="setActiveTab(this)"
+                        class="nav-item flex items-center gap-4 px-6 py-3 tab-active group">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="setActiveTab(this)"
+                        class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition-colors group">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                        <span class="font-medium">Agents</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="setActiveTab(this)"
+                        class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition-colors group">
+                        <i data-lucide="database" class="w-5 h-5"></i>
+                        <span class="font-medium">Memory Bank</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="setActiveTab(this)"
+                        class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition-colors group">
+                        <i data-lucide="git-merge" class="w-5 h-5"></i>
+                        <span class="font-medium">Workflows</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="setActiveTab(this)"
+                        class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition-colors group">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        <span class="font-medium">Analytics</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="setActiveTab(this)"
+                        class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition-colors group">
+                        <i data-lucide="plug-2" class="w-5 h-5"></i>
+                        <span class="font-medium">Integrations</span>
+                    </a>
+                </nav>
+                <div class="p-4 border-t border-white/5">
+                    <div class="bg-white/5 rounded-xl p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-slate-400">Neural Sync</span>
+                            <span class="text-xs text-os-cyan" id="sync-val">98%</span>
+                        </div>
+                        <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-os-cyan h-full transition-all duration-1000" id="sync-bar"
+                                style="width: 98%"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT AREA -->
+            <main class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-transparent">
+                <div class="max-w-7xl mx-auto space-y-8">
+
+                    <!-- 3. COMMAND CONSOLE -->
+                    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto">
+                        <div
+                            class="lg:col-span-2 glass rounded-3xl neo-border flex flex-col h-[500px] relative overflow-hidden">
+                            <div class="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-os-cyan animate-pulse"></div>
+                                    <span class="text-xs font-mono uppercase tracking-widest text-os-cyan">Neural Core
+                                        Interface</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span
+                                        class="text-[10px] bg-os-purple/20 text-os-purple px-2 py-0.5 rounded border border-os-purple/30 cursor-help"
+                                        title="Model Info">GPT-4-TURBO</span>
+                                    <span
+                                        class="text-[10px] bg-os-cyan/20 text-os-cyan px-2 py-0.5 rounded border border-os-cyan/30">ACTIVE</span>
+                                </div>
+                            </div>
+
+                            <div id="chat-window" class="flex-1 p-6 overflow-y-auto space-y-4 custom-scrollbar">
+                                <div class="flex gap-4">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-os-cyan/20 flex items-center justify-center shrink-0">
+                                        <i data-lucide="bot" class="w-5 h-5 text-os-cyan"></i>
+                                    </div>
+                                    <div
+                                        class="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tl-none max-w-[80%]">
+                                        <p class="text-sm leading-relaxed">System Online. How can I assist with your
+                                            workflow orchestration today?</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="thinking" class="hidden px-6 py-2 flex items-center gap-2">
+                                <span class="text-[10px] text-slate-400 uppercase font-mono italic">Processing neural
+                                    paths</span>
+                                <div class="flex gap-1">
+                                    <div class="w-1 h-1 bg-os-cyan rounded-full typing-dot"></div>
+                                    <div class="w-1 h-1 bg-os-cyan rounded-full typing-dot"></div>
+                                    <div class="w-1 h-1 bg-os-cyan rounded-full typing-dot"></div>
+                                </div>
+                            </div>
+
+                            <div class="p-6">
+                                <div class="relative">
+                                    <textarea id="chat-input" rows="1" placeholder="Type command or query..."
+                                        class="w-full bg-os-bg border border-white/10 rounded-2xl py-4 pl-4 pr-24 focus:outline-none focus:border-os-cyan/50 resize-none custom-scrollbar transition-all"></textarea>
+                                    <div class="absolute right-3 bottom-3 flex gap-2">
+                                        <button onclick="showToast('Attachment system simulation.')"
+                                            class="p-2 hover:bg-white/5 rounded-xl text-slate-500 transition-colors">
+                                            <i data-lucide="paperclip" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="handleSend()"
+                                            class="bg-os-cyan text-os-bg p-2 rounded-xl hover:scale-105 active:scale-95 transition-all">
+                                            <i data-lucide="send" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. FLOATING WIDGETS -->
+                        <div class="space-y-6">
+                            <!-- Agent Performance -->
+                            <div
+                                class="glass p-5 rounded-3xl border border-white/5 group hover:border-os-cyan/30 transition-all cursor-default">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 class="font-heading font-bold">Agent Performance</h3>
+                                        <p class="text-xs text-slate-500">Live optimization score</p>
+                                    </div>
+                                    <button onclick="refreshStats()"
+                                        class="p-1 hover:bg-white/10 rounded-lg active:rotate-180 transition-all">
+                                        <i data-lucide="refresh-cw" class="text-os-cyan w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-end gap-2 mb-4">
+                                    <span id="perf-score"
+                                        class="text-3xl font-heading font-bold transition-all">99.2</span>
+                                    <span class="text-os-lime text-xs pb-1">+0.4%</span>
+                                </div>
+                                <div class="flex items-center gap-1 h-12" id="bar-chart">
+                                    <!-- Dynamic bars -->
+                                </div>
+                            </div>
+
+                            <!-- Memory Usage -->
+                            <div class="glass p-5 rounded-3xl border border-white/5">
+                                <h3 class="font-heading font-bold mb-4">Memory Usage</h3>
+                                <div class="flex justify-center relative py-4">
+                                    <svg class="w-32 h-32 transform -rotate-90">
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8"
+                                            fill="transparent" class="text-white/5"></circle>
+                                        <circle id="memory-circle" cx="64" cy="64" r="58" stroke="currentColor"
+                                            stroke-width="8" fill="transparent" stroke-dasharray="364.4"
+                                            stroke-dashoffset="100" class="text-os-purple transition-all duration-1000">
+                                        </circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span id="memory-percent" class="text-xl font-bold">72%</span>
+                                        <span class="text-[10px] text-slate-500">12.4GB</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-xs mt-2 text-slate-400">
+                                    <span>Sync: Stable</span>
+                                    <span>Latency: 14ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 5. AGENT MARKETPLACE -->
+                    <section>
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-heading font-bold">Agent Marketplace</h2>
+                            <div class="flex gap-2">
+                                <button onclick="scrollMarketplace('left')"
+                                    class="p-2 glass rounded-full hover:bg-white/10 active:scale-90"><i
+                                        data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                                <button onclick="scrollMarketplace('right')"
+                                    class="p-2 glass rounded-full hover:bg-white/10 active:scale-90"><i
+                                        data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                            </div>
+                        </div>
+                        <div id="agent-carousel"
+                            class="flex gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x scroll-smooth">
+                            <!-- Card 1 -->
+                            <div
+                                class="min-w-[280px] snap-start agent-card glass p-6 rounded-3xl border border-white/5 group hover:bg-white/10 transition-all cursor-pointer">
+                                <div
+                                    class="w-12 h-12 bg-os-cyan/10 rounded-2xl flex items-center justify-center mb-4 agent-icon transition-transform">
+                                    <i data-lucide="pen-tool" class="text-os-cyan w-6 h-6"></i>
+                                </div>
+                                <h4 class="font-bold mb-1">Content Weaver</h4>
+                                <p class="text-xs text-slate-400 mb-6">Expert semantic SEO and long-form content
+                                    generation.</p>
+                                <button onclick="deployAgent('Content Weaver')"
+                                    class="w-full py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold hover:bg-os-cyan hover:text-os-bg transition-all">DEPLOY
+                                    AGENT</button>
+                            </div>
+                            <!-- Card 2 -->
+                            <div
+                                class="min-w-[280px] snap-start agent-card glass p-6 rounded-3xl border border-white/5 group hover:bg-white/10 transition-all cursor-pointer">
+                                <div
+                                    class="w-12 h-12 bg-os-purple/10 rounded-2xl flex items-center justify-center mb-4 agent-icon transition-transform">
+                                    <i data-lucide="activity" class="text-os-purple w-6 h-6"></i>
+                                </div>
+                                <h4 class="font-bold mb-1">Automation Pulse</h4>
+                                <p class="text-xs text-slate-400 mb-6">Connect API endpoints and trigger complex logic
+                                    flows.</p>
+                                <button onclick="deployAgent('Automation Pulse')"
+                                    class="w-full py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold hover:bg-os-purple hover:text-white transition-all">DEPLOY
+                                    AGENT</button>
+                            </div>
+                            <!-- Card 3 -->
+                            <div
+                                class="min-w-[280px] snap-start agent-card glass p-6 rounded-3xl border border-white/5 group hover:bg-white/10 transition-all cursor-pointer">
+                                <div
+                                    class="w-12 h-12 bg-os-lime/10 rounded-2xl flex items-center justify-center mb-4 agent-icon transition-transform">
+                                    <i data-lucide="bar-chart-big" class="text-os-lime w-6 h-6"></i>
+                                </div>
+                                <h4 class="font-bold mb-1">Data Oracle</h4>
+                                <p class="text-xs text-slate-400 mb-6">Deep predictive analytics and visualization
+                                    modeling.</p>
+                                <button onclick="deployAgent('Data Oracle')"
+                                    class="w-full py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold hover:bg-os-lime hover:text-os-bg transition-all">DEPLOY
+                                    AGENT</button>
+                            </div>
+                            <!-- Card 4 -->
+                            <div
+                                class="min-w-[280px] snap-start agent-card glass p-6 rounded-3xl border border-white/5 group hover:bg-white/10 transition-all cursor-pointer">
+                                <div
+                                    class="w-12 h-12 bg-os-red/10 rounded-2xl flex items-center justify-center mb-4 agent-icon transition-transform">
+                                    <i data-lucide="shield-check" class="text-os-red w-6 h-6"></i>
+                                </div>
+                                <h4 class="font-bold mb-1">Security Sentry</h4>
+                                <p class="text-xs text-slate-400 mb-6">Real-time threat detection and auth management.
+                                </p>
+                                <button onclick="deployAgent('Security Sentry')"
+                                    class="w-full py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold hover:bg-os-red hover:text-white transition-all">DEPLOY
+                                    AGENT</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 6. WORKFLOW BUILDER -->
+                    <section class="pb-12">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-heading font-bold">Visual Workflow Logic</h2>
+                            <button onclick="showToast('Workflow saved to Memory Bank.')"
+                                class="text-xs bg-white/5 border border-white/10 px-3 py-1 rounded-lg hover:bg-white/10 transition-colors">SAVE
+                                WORKFLOW</button>
+                        </div>
+                        <div class="glass p-8 rounded-3xl border border-white/5 overflow-x-auto">
+                            <div class="flex items-center gap-4 min-w-[800px]">
+                                <div onclick="configNode('Trigger')"
+                                    class="flex flex-col items-center gap-2 group cursor-pointer">
+                                    <div
+                                        class="w-16 h-16 glass rounded-2xl flex items-center justify-center border border-os-cyan/40 bg-os-cyan/5 group-hover:bg-os-cyan group-hover:text-os-bg transition-all">
+                                        <i data-lucide="play" class="w-6 h-6"></i>
+                                    </div>
+                                    <span class="text-xs font-mono uppercase text-slate-400">Trigger</span>
+                                </div>
+                                <div class="flex-1 workflow-line"></div>
+                                <div onclick="configNode('AI Task')"
+                                    class="flex flex-col items-center gap-2 group cursor-pointer">
+                                    <div
+                                        class="w-16 h-16 glass rounded-2xl flex items-center justify-center border border-white/10 hover:border-os-purple group-hover:bg-os-purple group-hover:text-white transition-all">
+                                        <i data-lucide="brain" class="w-6 h-6"></i>
+                                    </div>
+                                    <span class="text-xs font-mono uppercase text-slate-400">AI Task</span>
+                                </div>
+                                <div class="flex-1 workflow-line"></div>
+                                <div onclick="configNode('Condition')"
+                                    class="flex flex-col items-center gap-2 group cursor-pointer">
+                                    <div
+                                        class="w-16 h-16 glass rounded-2xl flex items-center justify-center border border-white/10 hover:border-os-lime group-hover:bg-os-lime group-hover:text-os-bg transition-all">
+                                        <i data-lucide="git-branch" class="w-6 h-6"></i>
+                                    </div>
+                                    <span class="text-xs font-mono uppercase text-slate-400">Condition</span>
+                                </div>
+                                <div class="flex-1 workflow-line"></div>
+                                <div onclick="configNode('Output')"
+                                    class="flex flex-col items-center gap-2 group cursor-pointer">
+                                    <div
+                                        class="w-16 h-16 glass rounded-2xl flex items-center justify-center border border-white/10 hover:border-white transition-all">
+                                        <i data-lucide="save" class="w-6 h-6"></i>
+                                    </div>
+                                    <span class="text-xs font-mono uppercase text-slate-400">Output</span>
+                                </div>
+                                <div class="flex-1 workflow-line"></div>
+                                <div onclick="configNode('Notify')"
+                                    class="flex flex-col items-center gap-2 group cursor-pointer">
+                                    <div
+                                        class="w-16 h-16 glass rounded-2xl flex items-center justify-center border border-white/10 bg-os-purple/10 group-hover:bg-os-purple group-hover:text-white transition-all">
+                                        <i data-lucide="mail" class="w-6 h-6"></i>
+                                    </div>
+                                    <span class="text-xs font-mono uppercase text-slate-400">Notify</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <!-- 8. SMART SETTINGS PANEL (Slide-in) -->
+        <div id="settings-panel"
+            class="fixed inset-y-0 right-0 w-80 glass z-[100] translate-x-full shadow-2xl border-l border-white/10">
+            <div class="p-6 h-full flex flex-col">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-xl font-heading font-bold">OS Configuration</h2>
+                    <button onclick="toggleSettings()" class="p-2 hover:bg-white/10 rounded-full active:scale-90"><i
+                            data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+
+                <div class="space-y-6 flex-1 overflow-y-auto custom-scrollbar pr-2">
+                    <div>
+                        <label class="text-xs text-slate-500 uppercase tracking-widest font-mono mb-3 block">Display
+                            Theme</label>
+                        <div class="flex gap-2 p-1 bg-white/5 rounded-xl">
+                            <button onclick="setTheme('dark')" id="theme-dark"
+                                class="flex-1 py-2 bg-os-cyan text-os-bg rounded-lg text-xs font-bold transition-all">DARK</button>
+                            <button onclick="setTheme('light')" id="theme-light"
+                                class="flex-1 py-2 text-slate-400 text-xs font-bold transition-all">LIGHT</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-slate-500 uppercase tracking-widest font-mono mb-3 block">Neural
+                            Model</label>
+                        <select onchange="showToast('Neural engine switched to ' + this.value)"
+                            class="w-full bg-os-bg border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-os-cyan appearance-none cursor-pointer">
+                            <option>Gemini 1.5 Pro</option>
+                            <option>GPT-4 Omni</option>
+                            <option>Claude 3.5 Sonnet</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Ghost Mode</span>
+                        <div onclick="toggleSwitch(this)"
+                            class="w-10 h-5 bg-os-cyan rounded-full relative cursor-pointer transition-all shadow-[0_0_10px_rgba(0,245,255,0.3)]">
+                            <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Voice Feedback</span>
+                        <div onclick="toggleSwitch(this)"
+                            class="w-10 h-5 bg-white/10 rounded-full relative cursor-pointer transition-all">
+                            <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white/50 rounded-full transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/5">
+                        <label class="text-xs text-slate-500 uppercase tracking-widest font-mono mb-3 block">API Matrix
+                            Keys</label>
+                        <div class="space-y-2">
+                            <div
+                                class="bg-white/5 p-2 rounded-lg flex items-center justify-between border border-white/5">
+                                <span class="text-xs font-mono text-slate-400">sk-....4f92</span>
+                                <button onclick="copyToClipboard('sk-5512-neural-4f92')"
+                                    class="p-1 hover:text-os-cyan transition-colors active:scale-90">
+                                    <i data-lucide="copy" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()"
+                    class="w-full py-3 bg-os-red/10 text-os-red border border-os-red/30 rounded-2xl font-bold text-sm hover:bg-os-red hover:text-white transition-all mt-4">TERMINATE
+                    SESSION</button>
+            </div>
+        </div>
+
+        <!-- Node Config Modal -->
+        <div id="config-modal" class="fixed inset-0 z-[120] hidden items-center justify-center p-6 modal-overlay">
+            <div class="glass max-w-md w-full rounded-3xl p-8 border border-white/10">
+                <h2 class="text-2xl font-heading font-bold mb-4" id="modal-title">Node Configuration</h2>
+                <div class="space-y-4 mb-8">
+                    <p class="text-slate-400 text-sm">Configure the operational parameters for this logic block within
+                        the current workspace context.</p>
+                    <div class="p-4 bg-white/5 border border-white/5 rounded-2xl space-y-3">
+                        <div class="flex justify-between text-xs font-mono"><span class="text-slate-500">Node
+                                ID</span><span class="text-os-cyan" id="node-id">0x4F-A</span></div>
+                        <div class="flex justify-between text-xs font-mono"><span
+                                class="text-slate-500">Latency</span><span class="text-os-lime">2ms</span></div>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="closeModal()"
+                        class="flex-1 py-3 bg-white/5 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all">CANCEL</button>
+                    <button onclick="closeModal('success')"
+                        class="flex-1 py-3 bg-os-cyan text-os-bg rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-os-cyan/20 transition-all">SAVE
+                        NODE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. FOOTER -->
+        <footer
+            class="h-10 glass border-t border-white/5 flex items-center justify-between px-6 text-[10px] text-slate-500 font-mono shrink-0">
+            <div class="flex gap-4">
+                <span>LATENCY: <span id="footer-latency">12ms</span></span>
+                <span>STATUS: STABLE</span>
+                <span>V: 2.5.0-PRO</span>
+            </div>
+            <div class="flex gap-6 items-center">
+                <a href="javascript:void(0)" onclick="showToast('Documentation loading...')"
+                    class="hover:text-os-cyan transition-colors">DOCUMENTATION</a>
+                <a href="javascript:void(0)" onclick="showToast('Security protocols updated.')"
+                    class="hover:text-os-cyan transition-colors">PROTOCOLS</a>
+                <span class="text-slate-600">© 2142 NEURAL NETWORKS INC.</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Application Logic -->
+</body>
+
+</html>
